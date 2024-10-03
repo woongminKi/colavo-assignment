@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import CountBox from './CountBox';
 import styled from 'styled-components';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { List } from './@types/List';
+import comma from '../util/comma';
 
 export default function Cart() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [totalPrice, setTotalPrice] = useState<number>(0);
   const [items, setItems] = useState<{ [key: string]: List }>({});
   const [discountItems, setDiscountItems] = useState([]);
   const { clickedList } = location.state || { clickedList: [] };
@@ -26,12 +28,22 @@ export default function Cart() {
     setItems({ ...newItems });
   };
 
+  useMemo(() => {
+    let sum = 0;
+    const itemsPrice = clickedList.map((id: string): number => {
+      return Number(items[id]?.price * items[id].count);
+    });
+    itemsPrice.forEach((price: number) => {
+      sum += price;
+    });
+    setTotalPrice(sum);
+  }, [items]);
+
   const getData = async () => {
     try {
       const { data } = await axios.get(
         'https://us-central1-colavolab.cloudfunctions.net/requestAssignmentCalculatorData'
       );
-      console.log('listData::', data);
       setItems(data.items);
       setDiscountItems(data.discounts);
     } catch (error) {
@@ -58,27 +70,35 @@ export default function Cart() {
         </ContentWrapper>
 
         <div style={{ flex: 1 }}>
-          {clickedList.map((id: string | any) => {
-            return (
-              <ListWrapper key={id}>
-                <Row>
-                  <MainText>{String(items[id]?.name)}</MainText>
-                  <SubText>{String(items[id]?.price)}원</SubText>
-                </Row>
-                <div>
-                  {Object.keys(items).length > 0 ? (
-                    <CountBox props={handleCount} items={items[id]} id={id} />
-                  ) : null}
-                </div>
-              </ListWrapper>
-            );
-          })}
+          {Object.keys(items).length > 0
+            ? clickedList.map((id: string | any) => {
+                return (
+                  <ListWrapper key={id}>
+                    <Row>
+                      <MainText>{String(items[id]?.name)}</MainText>
+                      <SubText>
+                        {String(comma(items[id]?.price * items[id].count))}원
+                      </SubText>
+                    </Row>
+                    <div>
+                      {Object.keys(items).length > 0 ? (
+                        <CountBox
+                          props={handleCount}
+                          items={items[id]}
+                          id={id}
+                        />
+                      ) : null}
+                    </div>
+                  </ListWrapper>
+                );
+              })
+            : null}
         </div>
 
         <BottomButtonWrapper>
           <BottomText>
             <div>합계</div>
-            <h2>0원</h2>
+            <h2>{comma(totalPrice)}원</h2>
           </BottomText>
           <BottomButton>다음</BottomButton>
         </BottomButtonWrapper>
@@ -154,7 +174,7 @@ const ListWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 16px 10px;
+  margin: 16px 14px;
   padding: 8px 0;
 `;
 const Row = styled.div`

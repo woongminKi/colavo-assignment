@@ -4,6 +4,7 @@ import { FaCheck } from 'react-icons/fa';
 import { List } from './@types/List';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import comma from '../util/comma';
 
 export default function ItemList() {
   const navigate = useNavigate();
@@ -27,17 +28,21 @@ export default function ItemList() {
 
   return (
     <div>
-      {Object.keys(items)?.map((id: string) => {
-        return (
-          <ListWrapper>
-            <Row key={id} onClick={() => handleClick(id)}>
-              <MainText>{items[id].name}</MainText>
-              <SubText>{items[id].price}원</SubText>
-            </Row>
-            {clickedList.includes(id) && <FaCheck color='#ae9ef0' />}
-          </ListWrapper>
-        );
-      })}
+      {Object.keys(items).length > 0 ? (
+        Object.keys(items)?.map((id: string) => {
+          return (
+            <ListWrapper>
+              <Row key={id} onClick={() => handleClick(id)}>
+                <MainText>{items[id].name}</MainText>
+                <SubText>{comma(items[id].price)}원</SubText>
+              </Row>
+              {clickedList.includes(id) && <FaCheck color='#ae9ef0' />}
+            </ListWrapper>
+          );
+        })
+      ) : (
+        <div>'새로고침을 해주세요.'</div>
+      )}
 
       <BottomButtonWrapper>
         <BottomText>서비스를 선택하세요(여러 개 선택가능)</BottomText>
