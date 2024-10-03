@@ -4,7 +4,7 @@ import styled, { keyframes } from 'styled-components';
 import Header from './components/Header/Header';
 import Cart from './components/Cart';
 import Discount from './components/Discount';
-import List from './components/List';
+import ItemList from './components/List';
 
 function App() {
   const handleCartPage = () => {
@@ -20,7 +20,7 @@ function App() {
           <Header />
           <Routes>
             <Route path='/cart' element={<Cart />} />
-            <Route path='/list' element={<List />} />
+            <Route path='/list' element={<ItemList />} />
             <Route path='/discount' element={<Discount />} />
           </Routes>
         </AnimatedPage>
@@ -47,9 +47,9 @@ const AnimatedPage = styled.div`
 const Button = styled.button`
   width: 100px;
   height: 50px;
-  border: none;
-  color: #fff;
-  background-color: #ae9ef0;
+  border: 1px solid #ae9ef0;
+  color: #ae9ef0;
+  background-color: #fff;
   border-radius: 4px;
 `;
 

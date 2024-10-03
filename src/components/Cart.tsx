@@ -1,16 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { List } from './@types/List';
 
 export default function Cart() {
-  const [items, setItems] = useState([]);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [items, setItems] = useState<{ [key: string]: List }>({});
   const [discountItems, setDiscountItems] = useState([]);
+  const { clickedList } = location.state || { clickedList: [] };
+  console.log('items::', items);
+  console.log('clickedList::', clickedList);
 
   const openItemList = () => {
-    window.location.href = '/list';
+    navigate('/list', { state: { items } }); // state로 items 전달
   };
   const openDiscountList = () => {
-    window.location.href = '/discount';
+    // window.location.href = '/discount';
   };
 
   const getData = async () => {
@@ -44,7 +52,19 @@ export default function Cart() {
           </Button>
         </ContentWrapper>
 
-        <div style={{ flex: 1 }}></div>
+        <div style={{ flex: 1 }}>
+          {clickedList.map((id: string | any) => {
+            return (
+              <ListWrapper key={id}>
+                <Row>
+                  <MainText>{String(items[id]?.name)}</MainText>
+                  <SubText>{String(items[id]?.price)}원</SubText>
+                </Row>
+                <div>{String(items[id]?.count)}</div>
+              </ListWrapper>
+            );
+          })}
+        </div>
 
         <BottomButtonWrapper>
           <BottomText>
@@ -119,4 +139,26 @@ const BottomButton = styled.button`
   font-size: 16px;
   font-weight: bold;
   border-radius: 10px;
+`;
+
+const ListWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 16px 10px;
+  padding: 8px 0;
+`;
+const Row = styled.div`
+  width: 95%;
+  text-align: left;
+`;
+const MainText = styled.div`
+  width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+`;
+const SubText = styled.div`
+  color: #d3d3d3;
 `;

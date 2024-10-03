@@ -23,7 +23,7 @@ export default function Header() {
           </HeaderTextWrapper>
           <Button></Button>
         </>
-      ) : pagePath === 'product' ? (
+      ) : pagePath === 'list' ? (
         <>
           <HeaderText>시술메뉴</HeaderText>
           <Button>➕</Button>
