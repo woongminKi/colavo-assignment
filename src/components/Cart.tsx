@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import CountBox from './CountBox';
 import styled from 'styled-components';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -11,14 +12,18 @@ export default function Cart() {
   const [items, setItems] = useState<{ [key: string]: List }>({});
   const [discountItems, setDiscountItems] = useState([]);
   const { clickedList } = location.state || { clickedList: [] };
-  console.log('items::', items);
-  console.log('clickedList::', clickedList);
 
   const openItemList = () => {
-    navigate('/list', { state: { items } }); // state로 items 전달
+    navigate('/list', { state: { items } });
   };
   const openDiscountList = () => {
     // window.location.href = '/discount';
+  };
+
+  const handleCount = (id: string, count: number) => {
+    const newItems = items;
+    newItems[id].count = count;
+    setItems({ ...newItems });
   };
 
   const getData = async () => {
@@ -60,7 +65,11 @@ export default function Cart() {
                   <MainText>{String(items[id]?.name)}</MainText>
                   <SubText>{String(items[id]?.price)}원</SubText>
                 </Row>
-                <div>{String(items[id]?.count)}</div>
+                <div>
+                  {Object.keys(items).length > 0 ? (
+                    <CountBox props={handleCount} items={items[id]} id={id} />
+                  ) : null}
+                </div>
               </ListWrapper>
             );
           })}
