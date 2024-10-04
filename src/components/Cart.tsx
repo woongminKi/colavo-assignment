@@ -2,24 +2,46 @@ import React, { useEffect, useState, useMemo } from 'react';
 import CountBox from './CountBox';
 import styled from 'styled-components';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { List } from './@types/List';
+import { Discount } from './@types/Discount';
 import comma from '../util/comma';
+import { addItem, removeItem } from '../feature/itemList/itemSlice';
+import {
+  addDiscountItem,
+  removeDiscountItem,
+} from '../feature/discountItems/discountSlice';
 
 export default function Cart() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [items, setItems] = useState<{ [key: string]: List }>({});
-  const [discountItems, setDiscountItems] = useState([]);
-  const { clickedList } = location.state || { clickedList: [] };
+  const [discountItems, setDiscountItems] = useState<{
+    [key: string]: Discount;
+  }>({});
+  const clickedList = useSelector(
+    (state: any) => state.itemReducer.clickedItemList[0]
+  );
+  const clickedDiscountList = useSelector(
+    (state: any) => state.discountReducer.clickedDiscountList[0]
+  );
+  // console.log('items::', items);
+  // console.log('clickedList::', clickedList);
+  // console.log('clickedDiscountList::', clickedDiscountList);
+  if (Object.keys(items).length > 0) {
+    dispatch(addItem(items));
+  }
+  if (Object.keys(discountItems).length > 0) {
+    dispatch(addDiscountItem(discountItems));
+  }
 
   const openItemList = () => {
-    navigate('/list', { state: { items } });
+    navigate('/list');
   };
   const openDiscountList = () => {
-    // window.location.href = '/discount';
+    navigate('/discount');
   };
 
   const handleCount = (id: string, count: number) => {
@@ -30,13 +52,25 @@ export default function Cart() {
 
   useMemo(() => {
     let sum = 0;
-    const itemsPrice = clickedList.map((id: string): number => {
-      return Number(items[id]?.price * items[id].count);
-    });
-    itemsPrice.forEach((price: number) => {
-      sum += price;
-    });
-    setTotalPrice(sum);
+    // if (Object.keys(items).length > 0) {
+    //   const itemsPrice = clickedList.map((id: string): number => {
+    //     if (items[id].count < 0) {
+    //       items[id].count = 0;
+    //     }
+    //     console.log('111::', items[id]?.price, items[id].count);
+    //     return Number(items[id]?.price * items[id].count);
+    //   });
+
+    //   console.log('itemsPrice::', itemsPrice);
+    //   itemsPrice.forEach((price: number) => {
+    //     if (price < 0) {
+    //       price = 0;
+    //     }
+    //     sum += price;
+    //   });
+    //   console.log('items::', items);
+    //   setTotalPrice(sum);
+    // }
   }, [items]);
 
   const getData = async () => {
@@ -70,7 +104,7 @@ export default function Cart() {
         </ContentWrapper>
 
         <div style={{ flex: 1 }}>
-          {Object.keys(items).length > 0
+          {Object.keys(items).length > 0 && clickedList !== undefined
             ? clickedList.map((id: string | any) => {
                 return (
                   <ListWrapper key={id}>
@@ -89,6 +123,30 @@ export default function Cart() {
                         />
                       ) : null}
                     </div>
+                  </ListWrapper>
+                );
+              })
+            : null}
+          {Object.keys(discountItems).length > 0 &&
+          clickedDiscountList !== undefined
+            ? clickedDiscountList.map((id: string | any) => {
+                return (
+                  <ListWrapper key={id}>
+                    <Row>
+                      <MainText>{String(discountItems[id]?.name)}</MainText>
+                      <SubText2>
+                        {clickedList.map((id: string) => {
+                          return items[id]?.count > 1
+                            ? items[id]?.name + `x${items[id]?.count}` + ' '
+                            : items[id]?.name + '' + ' ';
+                        })}
+                      </SubText2>
+                      <SubTextDiscount>
+                        {String(
+                          Math.round(discountItems[id]?.rate * 100) + '%'
+                        )}
+                      </SubTextDiscount>
+                    </Row>
                   </ListWrapper>
                 );
               })
@@ -190,4 +248,11 @@ const MainText = styled.div`
 `;
 const SubText = styled.div`
   color: #d3d3d3;
+`;
+const SubText2 = styled.div`
+  font-size: 14px;
+  color: #d3d3d3;
+`;
+const SubTextDiscount = styled.div`
+  color: #ec8aae;
 `;

@@ -9,6 +9,10 @@ interface CountBoxProps {
 }
 
 export default function CountBox({ props, items, id }: CountBoxProps) {
+  if (items.count < 0) {
+    items.count = 0;
+    alert('0보다 작을 수 없습니다.');
+  }
   return (
     <CountBoxWrapper>
       <div onClick={() => props(id, items.count - 1 || 0)}>-</div>

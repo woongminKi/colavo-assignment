@@ -4,12 +4,19 @@ import { FaCheck } from 'react-icons/fa';
 import { List } from './@types/List';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import comma from '../util/comma';
+import {
+  addItem,
+  removeItem,
+  addClickedItem,
+} from '../feature/itemList/itemSlice';
 
 export default function ItemList() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
-  const { items } = location.state || { items: [] };
+  const items = useSelector((state: any) => state.itemReducer.itemList[0]);
+  // console.log('items in List::', items);
   const [clickedList, setClickedList] = useState<string[]>([]);
   const [isCheck, setIsCheck] = useState<boolean>(false);
 
@@ -23,7 +30,8 @@ export default function ItemList() {
   };
 
   const handleSubmit = () => {
-    navigate('/cart', { state: { clickedList } }); // state로 items 전달
+    dispatch(addClickedItem(clickedList));
+    navigate('/cart');
   };
 
   return (
