@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FaCheck } from 'react-icons/fa';
-import { List } from './@types/List';
+import { DiscountNewTarget } from './@types/Discount';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import comma from '../util/comma';
 import { addClickedDiscountItem } from '../feature/discountItems/discountSlice';
 
 export default function Discount() {
@@ -13,9 +12,11 @@ export default function Discount() {
   const discountItems = useSelector(
     (state: any) => state.discountReducer.discountItems[0]
   );
+  const clickedList = useSelector(
+    (state: any) => state.itemReducer.clickedItemList[0]
+  );
   const [clickedDiscountList, setClickedDiscountList] = useState<string[]>([]);
   const [isCheck, setIsCheck] = useState<boolean>(false);
-  // console.log('discountItems::', discountItems);
 
   const handleClick = (id: string) => {
     if (isCheck) {
@@ -27,7 +28,14 @@ export default function Discount() {
   };
 
   const handleSubmit = () => {
-    dispatch(addClickedDiscountItem(clickedDiscountList));
+    const newDiscountObj: { [key: string]: DiscountNewTarget } = {};
+    clickedDiscountList.map((elem: string) => {
+      newDiscountObj[elem] = {
+        ...discountItems[elem],
+        target: clickedList,
+      };
+    });
+    dispatch(addClickedDiscountItem(newDiscountObj));
     navigate('/cart');
   };
 

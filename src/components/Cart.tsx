@@ -2,16 +2,14 @@ import React, { useEffect, useState, useMemo } from 'react';
 import CountBox from './CountBox';
 import styled from 'styled-components';
 import axios from 'axios';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { List } from './@types/List';
-import { Discount } from './@types/Discount';
+import { DiscountNewTarget } from './@types/Discount';
 import comma from '../util/comma';
-import { addItem, removeItem } from '../feature/itemList/itemSlice';
-import {
-  addDiscountItem,
-  removeDiscountItem,
-} from '../feature/discountItems/discountSlice';
+import { addItem } from '../feature/itemList/itemSlice';
+import { addDiscountItem } from '../feature/discountItems/discountSlice';
+import DiscountModal from './DiscountModal';
 
 export default function Cart() {
   const dispatch = useDispatch();
@@ -19,17 +17,16 @@ export default function Cart() {
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [items, setItems] = useState<{ [key: string]: List }>({});
   const [discountItems, setDiscountItems] = useState<{
-    [key: string]: Discount;
+    [key: string]: DiscountNewTarget;
   }>({});
+  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
   const clickedList = useSelector(
     (state: any) => state.itemReducer.clickedItemList[0]
   );
   const clickedDiscountList = useSelector(
     (state: any) => state.discountReducer.clickedDiscountList[0]
   );
-  // console.log('items::', items);
-  // console.log('clickedList::', clickedList);
-  // console.log('clickedDiscountList::', clickedDiscountList);
+
   if (Object.keys(items).length > 0) {
     dispatch(addItem(items));
   }
@@ -45,32 +42,65 @@ export default function Cart() {
   };
 
   const handleCount = (id: string, count: number) => {
-    const newItems = items;
-    newItems[id].count = count;
-    setItems({ ...newItems });
+    const newItems = { ...items };
+    newItems[id] = { ...newItems[id], count };
+    setItems(newItems);
+  };
+  const handleModal = () => {
+    setIsOpenModal(true);
+  };
+  const handleCloseModal = () => {
+    setIsOpenModal(false);
   };
 
   useMemo(() => {
     let sum = 0;
-    // if (Object.keys(items).length > 0) {
-    //   const itemsPrice = clickedList.map((id: string): number => {
-    //     if (items[id].count < 0) {
-    //       items[id].count = 0;
-    //     }
-    //     console.log('111::', items[id]?.price, items[id].count);
-    //     return Number(items[id]?.price * items[id].count);
-    //   });
+    let sumDiscount = 0;
+    let itemsPrice: number[] = [];
+    let discountPrice: number[] = [];
+    if (Object.keys(items).length > 0 && clickedList !== undefined) {
+      itemsPrice = clickedList.map((id: string): number => {
+        if (items[id].count < 0) {
+          items[id].count = 0;
+        }
+        return Number(items[id]?.price * items[id].count);
+      });
+      itemsPrice.forEach((price: number) => {
+        if (price < 0) {
+          price = 0;
+        }
+        sum += price;
+      });
 
-    //   console.log('itemsPrice::', itemsPrice);
-    //   itemsPrice.forEach((price: number) => {
-    //     if (price < 0) {
-    //       price = 0;
-    //     }
-    //     sum += price;
-    //   });
-    //   console.log('items::', items);
-    //   setTotalPrice(sum);
-    // }
+      if (
+        Object.keys(discountItems).length > 0 &&
+        clickedDiscountList !== undefined
+      ) {
+        Object.keys(clickedDiscountList).forEach((id: string) => {
+          clickedDiscountList[id].target.forEach((elem: string) => {
+            if (clickedList.includes(elem)) {
+              discountPrice.push(
+                Number(
+                  items[elem].price * items[elem].count * discountItems[id].rate
+                )
+              );
+            }
+          });
+        });
+      }
+      discountPrice.forEach((price: number) => {
+        if (price < 0) {
+          price = 0;
+        }
+        sumDiscount += Math.round(price);
+      });
+
+      if (sum - sumDiscount < 0) {
+        setTotalPrice(0);
+      } else {
+        setTotalPrice(sum - sumDiscount);
+      }
+    }
   }, [items]);
 
   const getData = async () => {
@@ -91,11 +121,11 @@ export default function Cart() {
     <>
       <CartWrapper>
         <ContentWrapper>
-          <Button color='#E0E0E0' fontColor='#A0A0A0' onClick={openItemList}>
+          <Button bgColor='#E0E0E0' fontColor='#A0A0A0' onClick={openItemList}>
             + 시술
           </Button>
           <Button
-            color='#FFE0E5'
+            bgColor='#FFE0E5'
             fontColor='#FF6B81'
             onClick={openDiscountList}
           >
@@ -129,9 +159,9 @@ export default function Cart() {
             : null}
           {Object.keys(discountItems).length > 0 &&
           clickedDiscountList !== undefined
-            ? clickedDiscountList.map((id: string | any) => {
+            ? Object.keys(clickedDiscountList).map((id: string) => {
                 return (
-                  <ListWrapper key={id}>
+                  <ListWrapper key={id} style={{ display: 'flex' }}>
                     <Row>
                       <MainText>{String(discountItems[id]?.name)}</MainText>
                       <SubText2>
@@ -143,15 +173,47 @@ export default function Cart() {
                       </SubText2>
                       <SubTextDiscount>
                         {String(
-                          Math.round(discountItems[id]?.rate * 100) + '%'
+                          '-' +
+                            comma(
+                              Math.round(
+                                clickedDiscountList[id].target.reduce(
+                                  (acc: number, elem: string) => {
+                                    if (clickedList.includes(elem)) {
+                                      return (
+                                        acc +
+                                        Number(
+                                          items[elem].price *
+                                            items[elem].count *
+                                            discountItems[id].rate
+                                        )
+                                      );
+                                    }
+                                    return acc;
+                                  },
+                                  0
+                                )
+                              )
+                            )
                         )}
+                        원({Math.round(discountItems[id]?.rate * 100) + '%'})
                       </SubTextDiscount>
                     </Row>
+                    <EditButton onClick={handleModal}>수정</EditButton>
                   </ListWrapper>
                 );
               })
             : null}
         </div>
+
+        {isOpenModal ? (
+          <DiscountModal
+            onOpen={isOpenModal}
+            onClose={handleCloseModal}
+            items={items}
+            clickedList={clickedList}
+            clickedDiscountList={clickedDiscountList}
+          />
+        ) : null}
 
         <BottomButtonWrapper>
           <BottomText>
@@ -179,13 +241,13 @@ const CartWrapper = styled.div`
   minheight: '100vh';
 `;
 
-const Button = styled.button<{ fontColor?: string }>`
+const Button = styled.button<{ fontColor?: string; bgColor: string }>`
   display: flex;
   align-items: center;
   justify-content: center;
   width: 44%;
   height: 50px;
-  background-color: ${(props) => props.color || '#ae9ef0'};
+  background-color: ${(props) => props.bgColor || '#ae9ef0'};
   color: ${(props) => props.fontColor || 'white'};
   border: none;
   cursor: pointer;
@@ -255,4 +317,15 @@ const SubText2 = styled.div`
 `;
 const SubTextDiscount = styled.div`
   color: #ec8aae;
+`;
+const EditButton = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 50px;
+  border: 1px solid #ae9ef0;
+  color: #ae9ef0;
+  background-color: #fff;
+  border-radius: 16px;
 `;

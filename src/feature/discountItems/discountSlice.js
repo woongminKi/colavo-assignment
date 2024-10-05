@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   discountItems: [],
   clickedDiscountList: [],
+  appliedDiscountItems: [],
 };
 
 export const discountItemSlice = createSlice({
@@ -20,9 +21,18 @@ export const discountItemSlice = createSlice({
     addClickedDiscountItem: (state, action) => {
       state.clickedDiscountList.push(action.payload);
     },
+    appliedDiscountItem: (state, action) => {
+      state.appliedDiscountItems = state.appliedDiscountItems.push(
+        action.payload
+      );
+    },
   },
 });
 
-export const { addDiscountItem, removeDiscountItem, addClickedDiscountItem } =
-  discountItemSlice.actions;
+export const {
+  addDiscountItem,
+  removeDiscountItem,
+  addClickedDiscountItem,
+  appliedDiscountItem,
+} = discountItemSlice.actions;
 export default discountItemSlice.reducer;

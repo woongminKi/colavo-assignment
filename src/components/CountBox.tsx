@@ -15,9 +15,9 @@ export default function CountBox({ props, items, id }: CountBoxProps) {
   }
   return (
     <CountBoxWrapper>
-      <div onClick={() => props(id, items.count - 1 || 0)}>-</div>
+      <div onClick={() => props(id, Math.max(items.count - 1, 1))}>-</div>
       {items.count}
-      <div onClick={() => props(id, items.count + 1 || 0)}>+</div>
+      <div onClick={() => props(id, items.count + 1 || 1)}>+</div>
     </CountBoxWrapper>
   );
 }

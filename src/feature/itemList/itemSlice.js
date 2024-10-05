@@ -18,7 +18,7 @@ export const itemSlice = createSlice({
       );
     },
     addClickedItem: (state, action) => {
-      state.clickedItemList.push(action.payload);
+      state.clickedItemList = [action.payload];
     },
   },
 });
