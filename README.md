@@ -1,46 +1,14 @@
-# Getting Started with Create React App
+# 콜라보그라운드 과제 - 기웅민
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+콜라보그라운드 과제 제출합니다.
 
-## Available Scripts
+## 유의 사항
 
-In the project directory, you can run:
+간혹 api에서 데이터가 넘어오지 않은 경우가 있어 '장바구니'로 이동해 api를 재호출할 수 있도록 예외처리를 했습니다. 버튼 클릭하면 '장바구니' 페이지로 이동하게 되고 api가 재호출이 됩니다.
+그래도 데이터가 넘어오지 않을 시 새로고침을 하면 넘어옵니다.
 
-### `npm start`
+## 과제 작업하면서 느낀점
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+1. 처음엔 state 라이브러리 사용 없이 구현해보고 싶었는데 route를 쪼개 놓은 상태에서 props로만 상태 관리를 하는것이 쉽지 않아 redux를 추후에 적용했습니다. Global state 라이브러리를 왜 쓰는지 편리함을 몸소 느낄 수 있었던 경험이었습니다.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+2. 페이지 이동이 많지 않아 route를 하나만 두고 작업했으면 어땠을까 싶었습니다. 실제 프로덕트에선 route를 분리한 것이 직관적이고 관리하기 쉽기 때문에 이번 과제를 할 때도 같은 구조를 잡았습니다. 그런데 이번 과제의 경우 페이지가 많지 않기 때문에 하나의 라우터에서 컴포넌트를 만들어 사용했다면 라우트 이동할 때 마다 데이터가 잘 넘어왔는지 체크하는 것을 줄일 수 있지 않았을까 하는 생각을 가졌습니다. 그리고 이렇게 했을 경우 1번처럼 props drilling으로 state를 관리하는 시도를 끝까지 완수할 수 있지 않았을까 하는 생각이 들었습니다.
