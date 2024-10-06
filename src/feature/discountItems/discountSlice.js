@@ -19,7 +19,7 @@ export const discountItemSlice = createSlice({
       );
     },
     addClickedDiscountItem: (state, action) => {
-      state.clickedDiscountList.push(action.payload);
+      state.clickedDiscountList = [action.payload];
     },
     appliedDiscountItem: (state, action) => {
       state.appliedDiscountItems = state.appliedDiscountItems.push(

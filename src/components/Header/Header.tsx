@@ -6,17 +6,19 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const pagePath = location.pathname.split('/').slice(-1)[0];
-  console.log(pagePath);
 
   const moveToHome = () => {
     navigate('/');
   };
+  const moveToCart = () => {
+    navigate('/cart');
+  };
 
   return (
     <HeaderWrapper>
-      <Button onClick={moveToHome}>✖️</Button>
       {pagePath === 'cart' ? (
         <>
+          <Button onClick={moveToHome}>✖️</Button>
           <HeaderTextWrapper>
             <HeaderText>곽지우</HeaderText>
             <SubHeaderText>2019. 6. 14. 오후 5:30</SubHeaderText>
@@ -25,11 +27,13 @@ export default function Header() {
         </>
       ) : pagePath === 'list' ? (
         <>
+          <Button onClick={moveToCart}>✖️</Button>
           <HeaderText>시술메뉴</HeaderText>
           <Button>➕</Button>
         </>
       ) : (
         <>
+          <Button onClick={moveToCart}>✖️</Button>
           <HeaderText>할인</HeaderText>
           <Button>➕</Button>
         </>

@@ -1,42 +1,44 @@
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import { FaCheck } from 'react-icons/fa';
-import { List } from './@types/List';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import comma from '../util/comma';
-import {
-  addItem,
-  removeItem,
-  addClickedItem,
-} from '../feature/itemList/itemSlice';
+import { addClickedItem } from '../feature/itemList/itemSlice';
 
 export default function ItemList() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const items = useSelector((state: any) => state.itemReducer.itemList[0]);
-  // console.log('items in List::', items);
   const [clickedList, setClickedList] = useState<string[]>([]);
-  const [isCheck, setIsCheck] = useState<boolean>(false);
+  const clickedListSaved = useSelector(
+    (state: any) => state.itemReducer.clickedItemList[0]
+  );
 
   const handleClick = (id: string) => {
-    if (isCheck) {
+    if (clickedList.includes(id)) {
       setClickedList(clickedList.filter((item) => item !== id));
     } else {
       setClickedList([...clickedList, id]);
     }
-    setIsCheck(!isCheck);
   };
-
   const handleSubmit = () => {
     dispatch(addClickedItem(clickedList));
     navigate('/cart');
   };
+  const goToCart = () => {
+    navigate('/cart');
+  };
+
+  useEffect(() => {
+    if (clickedListSaved !== undefined) {
+      setClickedList(clickedListSaved);
+    }
+  }, [clickedList]);
 
   return (
     <div>
-      {Object.keys(items).length > 0 ? (
+      {items !== undefined ? (
         Object.keys(items)?.map((id: string) => {
           return (
             <ListWrapper>
@@ -49,7 +51,15 @@ export default function ItemList() {
           );
         })
       ) : (
-        <div>'새로고침을 해주세요.'</div>
+        <div>
+          데이터가 불러오지 않았어요.
+          <br />
+          다시 돌아가서 실행해주세요.
+          <br />
+          <Button onClick={goToCart} style={{ marginTop: '8px' }}>
+            홈으로 가기
+          </Button>
+        </div>
       )}
 
       <BottomButtonWrapper>
@@ -116,4 +126,12 @@ const BottomButton = styled.button`
   font-size: 16px;
   font-weight: bold;
   border-radius: 10px;
+`;
+const Button = styled.button`
+  width: 100px;
+  height: 50px;
+  border: 1px solid #ae9ef0;
+  color: #ae9ef0;
+  background-color: #fff;
+  border-radius: 4px;
 `;

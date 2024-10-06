@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FaCheck } from 'react-icons/fa';
 import { DiscountNewTarget } from './@types/Discount';
@@ -15,16 +15,17 @@ export default function Discount() {
   const clickedList = useSelector(
     (state: any) => state.itemReducer.clickedItemList[0]
   );
+  const clickedDiscountListSaved = useSelector(
+    (state: any) => state.discountReducer.clickedDiscountList[0]
+  );
   const [clickedDiscountList, setClickedDiscountList] = useState<string[]>([]);
-  const [isCheck, setIsCheck] = useState<boolean>(false);
 
   const handleClick = (id: string) => {
-    if (isCheck) {
+    if (clickedDiscountList.includes(id)) {
       setClickedDiscountList(clickedDiscountList.filter((item) => item !== id));
     } else {
       setClickedDiscountList([...clickedDiscountList, id]);
     }
-    setIsCheck(!isCheck);
   };
 
   const handleSubmit = () => {
@@ -38,6 +39,15 @@ export default function Discount() {
     dispatch(addClickedDiscountItem(newDiscountObj));
     navigate('/cart');
   };
+  const goToCart = () => {
+    navigate('/cart');
+  };
+
+  useEffect(() => {
+    if (clickedDiscountListSaved !== undefined) {
+      setClickedDiscountList(Object.keys(clickedDiscountListSaved));
+    }
+  }, []);
 
   return (
     <div>
@@ -54,7 +64,15 @@ export default function Discount() {
           );
         })
       ) : (
-        <div>'새로고침을 해주세요.'</div>
+        <div>
+          데이터가 불러오지 않았어요.
+          <br />
+          다시 돌아가서 실행해주세요.
+          <br />
+          <Button onClick={goToCart} style={{ marginTop: '8px' }}>
+            홈으로 가기
+          </Button>
+        </div>
       )}
 
       <BottomButtonWrapper>
@@ -121,4 +139,12 @@ const BottomButton = styled.button`
   font-size: 16px;
   font-weight: bold;
   border-radius: 10px;
+`;
+const Button = styled.button`
+  width: 100px;
+  height: 50px;
+  border: 1px solid #ae9ef0;
+  color: #ae9ef0;
+  background-color: #fff;
+  border-radius: 4px;
 `;
